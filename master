@@ -4,6 +4,7 @@ import requests
 import sys
 import youtube_dl
 import os
+from data import insert_into_db
 
 
 def download_mp3():
@@ -19,8 +20,8 @@ def download_mp3():
     video_name = results[1][choice - 1]
     name = video_name + '-' + video_id + ".mp4"
     novo = video_name + '.mp3'
+    commit_db(url_watch, novo)
     download(url_watch, name, novo)
-
 
 def get_names_search(data):
     video_search = data.split('"title":{"runs":[{"text":"')
@@ -37,7 +38,6 @@ def get_names_search(data):
               .replace('\\xc3\\xab', 'ë')
               )
     results = [code_results, name_results]
-    print(results)
     return results
 
 
@@ -64,15 +64,6 @@ def download(url_watch, name, novo):
 
         ydl.download([url_watch])
 
-        pathiter = (os.path.join(root, filename)
-                    for root, _, filenames in os.walk('C:/Users/Gamer/PycharmProjects/guppe/Spotify')
-                    for filename in filenames
-                    )
-        for path in pathiter:
-            newname = path.replace('&', '')
-            if newname != path:
-                os.rename(path, newname)
-
         if '\\u0026' in name:
             name = name.replace('\\\\u0026', '&')
             novo = novo.replace('\\\\u0026', '&')
@@ -98,5 +89,10 @@ def remove_mp4(name):
     os.remove(name)
 
 
+def commit_db(url_watch, novo):
+    val = (url_watch, novo)
+    insert_into_db('DESKTOP-JJO8LEQ;', 'remusic;', val)
+
+
 if __name__ == '__main__':
-    download_mp3()
+   download_mp3()
